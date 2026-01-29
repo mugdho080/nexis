@@ -53,6 +53,52 @@ $participants = [
     ]
 ];
 
+$invoices = [
+    [
+        'invoice_no' => 'INV-1001',
+        'provider' => 'BrightPath Therapy',
+        'participant' => 'Ava Robinson',
+        'ndis_no' => '431002911',
+        'service_date' => '2024-07-12',
+        'status' => 'Awaiting Approval',
+        'total' => 1250,
+        'compliance' => 'OK',
+        'budget' => 'Core',
+        'support_items' => [
+            ['code' => '01_011_0107_1_1', 'description' => 'Daily Living Support', 'amount' => 750],
+            ['code' => '04_104_0125_6_1', 'description' => 'Assistive Tech Assessment', 'amount' => 500]
+        ]
+    ],
+    [
+        'invoice_no' => 'INV-1002',
+        'provider' => 'Accessible Homes Co.',
+        'participant' => 'Ava Robinson',
+        'ndis_no' => '431002911',
+        'service_date' => '2024-07-08',
+        'status' => 'Ready for PRODA',
+        'total' => 2400,
+        'compliance' => 'Flagged',
+        'budget' => 'Capital',
+        'support_items' => [
+            ['code' => '15_037_0117_1_3', 'description' => 'Home Modification Package', 'amount' => 2400]
+        ]
+    ],
+    [
+        'invoice_no' => 'INV-2001',
+        'provider' => 'Northern Support Co.',
+        'participant' => 'Mia Patel',
+        'ndis_no' => '431004562',
+        'service_date' => '2024-07-05',
+        'status' => 'Paid',
+        'total' => 980,
+        'compliance' => 'OK',
+        'budget' => 'Capacity Building',
+        'support_items' => [
+            ['code' => '07_101_0107_8_3', 'description' => 'Support Coordination', 'amount' => 980]
+        ]
+    ]
+];
+
 if ($action === 'get_stats') {
     echo json_encode($stats);
     exit;
@@ -60,6 +106,11 @@ if ($action === 'get_stats') {
 
 if ($action === 'get_participants') {
     echo json_encode($participants);
+    exit;
+}
+
+if ($action === 'get_invoices') {
+    echo json_encode($invoices);
     exit;
 }
 
@@ -124,6 +175,9 @@ if ($action === 'get_client') {
         ['name' => 'Accessible Homes Co.', 'service' => 'Home Modification Package', 'status' => 'Active'],
         ['name' => 'Northern Support Co.', 'service' => 'Support Coordination', 'status' => 'Pending']
     ];
+    $client['invoices'] = array_values(array_filter($invoices, function ($invoice) use ($client) {
+        return $invoice['ndis_no'] === $client['ndis_no'];
+    }));
     echo json_encode($client);
     exit;
 }

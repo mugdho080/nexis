@@ -93,9 +93,75 @@ if (empty($_SESSION['is_admin'])) {
             </table>
         </div>
     </div>
+    <div class="card shadow-sm border-0 rounded-3 mt-4">
+        <div class="card-header bg-white p-4 border-bottom">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div>
+                    <h5 class="mb-1 fw-bold">Invoices (All Clients)</h5>
+                    <small class="text-muted">Search by client, NDIS number, date, invoice number, or status.</small>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <input type="text" class="form-control form-control-sm" id="invoice-search-name" placeholder="Client or provider">
+                    <input type="text" class="form-control form-control-sm" id="invoice-search-ndis" placeholder="NDIS #">
+                    <input type="text" class="form-control form-control-sm" id="invoice-search-number" placeholder="Invoice #">
+                    <input type="date" class="form-control form-control-sm" id="invoice-search-date">
+                    <select class="form-select form-select-sm" id="invoice-search-status">
+                        <option value="">All Statuses</option>
+                        <option>Awaiting Approval</option>
+                        <option>Ready for PRODA</option>
+                        <option>Paid</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted">
+                    <tr>
+                        <th class="ps-4">Invoice</th>
+                        <th>Participant</th>
+                        <th>Provider</th>
+                        <th>Service Date</th>
+                        <th>Status</th>
+                        <th>Compliance</th>
+                        <th>Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-list">
+                    <tr><td colspan="8" class="text-center p-5">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="invoiceDetail" aria-labelledby="invoiceDetailLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="invoiceDetailLabel">Invoice Detail</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="mb-3">
+            <span class="badge bg-secondary" id="detail-status"></span>
+        </div>
+        <p class="mb-1"><strong>Invoice:</strong> <span id="detail-invoice"></span></p>
+        <p class="mb-1"><strong>Participant:</strong> <span id="detail-participant"></span></p>
+        <p class="mb-3"><strong>Provider:</strong> <span id="detail-provider"></span></p>
+        <label class="form-label">Update Status</label>
+        <select class="form-select mb-4" id="detail-status-select">
+            <option>Awaiting Approval</option>
+            <option>Ready for PRODA</option>
+            <option>Paid</option>
+        </select>
+        <h6>Support Items</h6>
+        <ul class="list-group list-group-flush" id="detail-items"></ul>
+    </div>
 </div>
 
 <script>
+let invoiceData = [];
+
 function loadData() {
     $.get('admin_api.php?action=get_stats', function(data) {
         $('#stat-funds').text('$' + Number(data.total_managed).toLocaleString(undefined, {minimumFractionDigits: 2}));
@@ -135,6 +201,69 @@ function loadData() {
         }
         $('#participant-list').html(html);
     });
+
+    $.get('admin_api.php?action=get_invoices', function(data) {
+        invoiceData = data || [];
+        renderInvoices();
+    });
+}
+
+function renderInvoices() {
+    const nameTerm = $('#invoice-search-name').val().toLowerCase();
+    const ndisTerm = $('#invoice-search-ndis').val().toLowerCase();
+    const numberTerm = $('#invoice-search-number').val().toLowerCase();
+    const dateTerm = $('#invoice-search-date').val();
+    const statusTerm = $('#invoice-search-status').val();
+
+    const filtered = invoiceData.filter(invoice => {
+        const matchesName = !nameTerm || invoice.participant.toLowerCase().includes(nameTerm) || invoice.provider.toLowerCase().includes(nameTerm);
+        const matchesNdis = !ndisTerm || invoice.ndis_no.toLowerCase().includes(ndisTerm);
+        const matchesNumber = !numberTerm || invoice.invoice_no.toLowerCase().includes(numberTerm);
+        const matchesDate = !dateTerm || invoice.service_date === dateTerm;
+        const matchesStatus = !statusTerm || invoice.status === statusTerm;
+        return matchesName && matchesNdis && matchesNumber && matchesDate && matchesStatus;
+    });
+
+    let rows = '';
+    if (!filtered.length) {
+        rows = '<tr><td colspan="8" class="text-center p-4">No invoices match the filters.</td></tr>';
+    } else {
+        filtered.forEach(invoice => {
+            rows += `
+                <tr>
+                    <td class="ps-4"><strong>${invoice.invoice_no}</strong></td>
+                    <td>${invoice.participant}<br><small class="text-muted">${invoice.ndis_no}</small></td>
+                    <td>${invoice.provider}</td>
+                    <td>${invoice.service_date}</td>
+                    <td><span class="badge bg-secondary">${invoice.status}</span></td>
+                    <td><span class="badge ${invoice.compliance === 'OK' ? 'bg-success' : 'bg-danger'}">${invoice.compliance}</span></td>
+                    <td>$${invoice.total.toLocaleString()}</td>
+                    <td><button class="btn btn-sm btn-outline-primary view-invoice" data-invoice="${invoice.invoice_no}">View</button></td>
+                </tr>
+            `;
+        });
+    }
+    $('#invoice-list').html(rows);
+}
+
+function showInvoiceDetail(invoiceNo) {
+    const invoice = invoiceData.find(item => item.invoice_no === invoiceNo);
+    if (!invoice) {
+        return;
+    }
+    $('#detail-status').text(invoice.status);
+    $('#detail-invoice').text(invoice.invoice_no);
+    $('#detail-participant').text(`${invoice.participant} · ${invoice.ndis_no}`);
+    $('#detail-provider').text(invoice.provider);
+    $('#detail-status-select').val(invoice.status);
+
+    const items = invoice.support_items.map(item => `
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>${item.code} · ${item.description}</span>
+            <span>$${item.amount.toLocaleString()}</span>
+        </li>
+    `).join('');
+    $('#detail-items').html(items);
 }
 
 $('#refresh-data').on('click', loadData);
@@ -146,9 +275,26 @@ $('#participant-search').on('input', function () {
     });
 });
 
+$('#invoice-search-name, #invoice-search-ndis, #invoice-search-number, #invoice-search-date, #invoice-search-status').on('input change', function () {
+    renderInvoices();
+});
+
+$(document).on('click', '.view-invoice', function () {
+    const invoiceNo = $(this).data('invoice');
+    showInvoiceDetail(invoiceNo);
+    const offcanvasElement = document.getElementById('invoiceDetail');
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
+    offcanvas.show();
+});
+
+$('#detail-status-select').on('change', function () {
+    $('#detail-status').text($(this).val());
+});
+
 $(document).ready(function() {
     loadData();
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -117,6 +117,34 @@ $clientId = $_GET['id'] ?? '1';
             <div class="card stat-card p-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                     <div>
+                        <h5 class="fw-bold mb-1">Client Invoices</h5>
+                        <p class="text-muted small mb-0">All submitted invoices for this participant.</p>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Status</th>
+                                <th>Service Date</th>
+                                <th>Compliance</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="client-invoice-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-12">
+            <div class="card stat-card p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                    <div>
                         <h5 class="fw-bold mb-1">Invoice Ingestion</h5>
                         <p class="text-muted small mb-0">Upload PDFs for OCR or enter invoices manually.</p>
                     </div>
@@ -220,9 +248,33 @@ $clientId = $_GET['id'] ?? '1';
     </div>
 </div>
 
+<div class="offcanvas offcanvas-end" tabindex="-1" id="clientInvoiceDetail" aria-labelledby="clientInvoiceDetailLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="clientInvoiceDetailLabel">Invoice Detail</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="mb-3">
+            <span class="badge bg-secondary" id="client-detail-status"></span>
+        </div>
+        <p class="mb-1"><strong>Invoice:</strong> <span id="client-detail-invoice"></span></p>
+        <p class="mb-1"><strong>Provider:</strong> <span id="client-detail-provider"></span></p>
+        <p class="mb-3"><strong>Budget Category:</strong> <span id="client-detail-budget"></span></p>
+        <label class="form-label">Update Status</label>
+        <select class="form-select mb-4" id="client-detail-status-select">
+            <option>Awaiting Approval</option>
+            <option>Ready for PRODA</option>
+            <option>Paid</option>
+        </select>
+        <h6>Support Items</h6>
+        <ul class="list-group list-group-flush" id="client-detail-items"></ul>
+    </div>
+</div>
+
 <script>
 const clientId = <?php echo json_encode($clientId); ?>;
 let knownInvoices = [];
+let clientInvoices = [];
 
 function formatCurrency(value) {
     return new Intl.NumberFormat('en-AU', {
@@ -236,6 +288,7 @@ function renderClient(data) {
     $('#client-meta').text(`${data.name} · NDIS ${data.ndis_no} · Plan ${data.start} → ${data.end}`);
     $('#badge-pending').text(data.pending_invoices);
     knownInvoices = data.existing_invoices || [];
+    clientInvoices = data.invoices || [];
 
     $('#budget-total').text(formatCurrency(data.budget.total));
     $('#budget-spent-label').text(formatCurrency(data.budget.spent));
@@ -300,6 +353,18 @@ function renderClient(data) {
         </tr>
     `).join('');
     $('#provider-list').html(providerHtml || '<tr><td colspan="3" class="text-muted">No providers assigned.</td></tr>');
+
+    const invoiceRows = clientInvoices.map(invoice => `
+        <tr>
+            <td><strong>${invoice.invoice_no}</strong></td>
+            <td><span class="badge bg-secondary">${invoice.status}</span></td>
+            <td>${invoice.service_date}</td>
+            <td><span class="badge ${invoice.compliance === 'OK' ? 'bg-success' : 'bg-danger'}">${invoice.compliance}</span></td>
+            <td>${formatCurrency(invoice.total)}</td>
+            <td><button class="btn btn-sm btn-outline-primary view-client-invoice" data-invoice="${invoice.invoice_no}">View</button></td>
+        </tr>
+    `).join('');
+    $('#client-invoice-list').html(invoiceRows || '<tr><td colspan="6" class="text-muted">No invoices submitted.</td></tr>');
 }
 
 $.get('admin_api.php?action=get_client&id=' + encodeURIComponent(clientId), function (data) {
@@ -322,6 +387,35 @@ $('#manual-form').on('submit', function (event) {
 
 $('#simulate-ocr').on('click', function () {
     $('#ocr-preview').html(`\n        <div class=\"alert alert-info\">\n            OCR Complete: Extracted ABN 51 824 753 556, Invoice INV-1004, Total $1,250.\n        </div>\n    `);
+});
+
+$(document).on('click', '.view-client-invoice', function () {
+    const invoiceNo = $(this).data('invoice');
+    const invoice = clientInvoices.find(item => item.invoice_no === invoiceNo);
+    if (!invoice) {
+        return;
+    }
+    $('#client-detail-status').text(invoice.status);
+    $('#client-detail-invoice').text(invoice.invoice_no);
+    $('#client-detail-provider').text(invoice.provider);
+    $('#client-detail-budget').text(invoice.budget);
+    $('#client-detail-status-select').val(invoice.status);
+
+    const items = invoice.support_items.map(item => `
+        <li class=\"list-group-item d-flex justify-content-between align-items-center\">
+            <span>${item.code} · ${item.description}</span>
+            <span>${formatCurrency(item.amount)}</span>
+        </li>
+    `).join('');
+    $('#client-detail-items').html(items);
+
+    const offcanvasElement = document.getElementById('clientInvoiceDetail');
+    const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement);
+    offcanvas.show();
+});
+
+$('#client-detail-status-select').on('change', function () {
+    $('#client-detail-status').text($(this).val());
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
