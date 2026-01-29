@@ -66,6 +66,11 @@ if ($action === 'get_participants') {
 if ($action === 'get_client') {
     $client = $participants[0];
     $client['pending_invoices'] = 12;
+    $client['existing_invoices'] = [
+        ['invoice_no' => 'INV-1001', 'provider' => 'BrightPath Therapy', 'email' => 'billing@brightpath.com'],
+        ['invoice_no' => 'INV-1002', 'provider' => 'Accessible Homes Co.', 'email' => 'accounts@accessiblehomes.com'],
+        ['invoice_no' => 'INV-1003', 'provider' => 'Northern Support Co.', 'email' => 'finance@northernco.com']
+    ];
     $client['budget'] = [
         'total' => 825000,
         'spent' => 412500,

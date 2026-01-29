@@ -111,10 +111,118 @@ $clientId = $_GET['id'] ?? '1';
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mt-1">
+        <div class="col-12">
+            <div class="card stat-card p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">Invoice Ingestion</h5>
+                        <p class="text-muted small mb-0">Upload PDFs for OCR or enter invoices manually.</p>
+                    </div>
+                    <span class="badge text-bg-info">Dummy Data</span>
+                </div>
+                <ul class="nav nav-tabs" id="invoiceTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ocr-tab" data-bs-toggle="tab" data-bs-target="#ocr-pane" type="button" role="tab">PDF Upload (OCR)</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual-pane" type="button" role="tab">Manual Entry</button>
+                    </li>
+                </ul>
+                <div class="tab-content pt-3">
+                    <div class="tab-pane fade show active" id="ocr-pane" role="tabpanel">
+                        <form id="ocr-form" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Upload Invoice PDF</label>
+                                <input type="file" class="form-control" accept="application/pdf">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Provider Email</label>
+                                <input type="email" class="form-control" placeholder="billing@provider.com">
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-outline-primary" type="button" id="simulate-ocr">Run OCR Simulation</button>
+                            </div>
+                        </form>
+                        <div class="mt-3" id="ocr-preview"></div>
+                    </div>
+                    <div class="tab-pane fade" id="manual-pane" role="tabpanel">
+                        <form id="manual-form" class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Business Name</label>
+                                <input type="text" class="form-control" name="business" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ABN</label>
+                                <input type="text" class="form-control" name="abn" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">BSB</label>
+                                <input type="text" class="form-control" name="bsb" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Account Number</label>
+                                <input type="text" class="form-control" name="account" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Invoice Number</label>
+                                <input type="text" class="form-control" name="invoice_no" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Invoice Date</label>
+                                <input type="date" class="form-control" name="invoice_date" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Budget Category</label>
+                                <select class="form-select" name="budget_category" required>
+                                    <option value="">Select</option>
+                                    <option>Core</option>
+                                    <option>Capital</option>
+                                    <option>Capacity Building</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Support Item</th>
+                                                <th>Service Date</th>
+                                                <th>Qty</th>
+                                                <th>Unit Price</th>
+                                                <th>GST</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><input type="text" class="form-control form-control-sm" placeholder="01_011_0107_1_1" required></td>
+                                                <td><input type="date" class="form-control form-control-sm" required></td>
+                                                <td><input type="number" class="form-control form-control-sm" value="1" min="1" required></td>
+                                                <td><input type="number" class="form-control form-control-sm" value="75" min="0" required></td>
+                                                <td><input type="text" class="form-control form-control-sm" value="GST Free"></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="alert alert-warning d-none" id="duplicate-warning"></div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary" type="submit">Submit Invoice</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
 const clientId = <?php echo json_encode($clientId); ?>;
+let knownInvoices = [];
 
 function formatCurrency(value) {
     return new Intl.NumberFormat('en-AU', {
@@ -127,6 +235,7 @@ function formatCurrency(value) {
 function renderClient(data) {
     $('#client-meta').text(`${data.name} · NDIS ${data.ndis_no} · Plan ${data.start} → ${data.end}`);
     $('#badge-pending').text(data.pending_invoices);
+    knownInvoices = data.existing_invoices || [];
 
     $('#budget-total').text(formatCurrency(data.budget.total));
     $('#budget-spent-label').text(formatCurrency(data.budget.spent));
@@ -195,6 +304,24 @@ function renderClient(data) {
 
 $.get('admin_api.php?action=get_client&id=' + encodeURIComponent(clientId), function (data) {
     renderClient(data);
+});
+
+$('#manual-form').on('submit', function (event) {
+    event.preventDefault();
+    const invoiceNo = $(this).find('[name="invoice_no"]').val().trim();
+    const match = knownInvoices.find(item => item.invoice_no === invoiceNo);
+    const $warning = $('#duplicate-warning');
+    if (match) {
+        $warning.removeClass('d-none').html(`Duplicate invoice detected for ${match.provider} (${match.invoice_no}). <a href=\"mailto:${match.email}?subject=Duplicate%20Invoice%20${match.invoice_no}\" class=\"alert-link\">Email provider</a>`);
+        return;
+    }
+    $warning.addClass('d-none').text('');
+    alert('Invoice submitted (dummy).');
+    this.reset();
+});
+
+$('#simulate-ocr').on('click', function () {
+    $('#ocr-preview').html(`\n        <div class=\"alert alert-info\">\n            OCR Complete: Extracted ABN 51 824 753 556, Invoice INV-1004, Total $1,250.\n        </div>\n    `);
 });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
