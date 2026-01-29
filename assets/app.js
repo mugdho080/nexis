@@ -151,6 +151,26 @@ $(function () {
         });
     }
 
+    function bindParticipantSearch() {
+        $('#participant-search').on('input', function () {
+            const term = $(this).val().toLowerCase();
+            $('#participant-table tr').each(function () {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(term) !== -1);
+            });
+        });
+    }
+
+    function bindPriceSearch() {
+        $('#price-search').on('input', function () {
+            const term = $(this).val().toLowerCase();
+            $('#price-table tr').each(function () {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(term) !== -1);
+            });
+        });
+    }
+
     function renderPreview(endpoint, data) {
         const $preview = $('#api-preview');
         const payload = JSON.stringify(
@@ -199,4 +219,6 @@ $(function () {
     updateQuarantineTotal();
     bindQuarantineForm();
     bindSpendingCheck();
+    bindParticipantSearch();
+    bindPriceSearch();
 });

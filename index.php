@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (empty($_SESSION['is_admin'])) {
+    header('Location: login.php');
+    exit;
+}
 $featurePillars = [
     [
         'title' => 'Budget & Fund Management',
@@ -123,6 +128,78 @@ $quarantineAgreements = [
         'status' => 'Active'
     ]
 ];
+
+$executiveOverview = [
+    [
+        'label' => 'Total Funds Managed',
+        'value' => 18450000,
+        'meta' => 'Active plans across all regions',
+        'badge' => 'AUD'
+    ],
+    [
+        'label' => 'Processing Queue',
+        'value' => 142,
+        'meta' => 'OCR, review, approval pipeline',
+        'badge' => 'Invoices'
+    ],
+    [
+        'label' => 'Utilization Alerts',
+        'value' => 38,
+        'meta' => 'Over/under spending flags',
+        'badge' => 'Participants'
+    ],
+    [
+        'label' => 'NDIA Rejection Rate',
+        'value' => 3.4,
+        'meta' => 'Last 30 days',
+        'badge' => '%'
+    ]
+];
+
+$participants = [
+    [
+        'name' => 'Ava Robinson',
+        'ndis' => '431002911',
+        'plan_end' => '2024-12-12',
+        'pace' => 'Transitioned',
+        'alerts' => 'Overspending'
+    ],
+    [
+        'name' => 'Noah Bennett',
+        'ndis' => '431009871',
+        'plan_end' => '2024-10-03',
+        'pace' => 'Pending',
+        'alerts' => 'On Track'
+    ],
+    [
+        'name' => 'Mia Patel',
+        'ndis' => '431004562',
+        'plan_end' => '2024-09-15',
+        'pace' => 'Transitioned',
+        'alerts' => 'Underspending'
+    ],
+    [
+        'name' => 'Liam Nguyen',
+        'ndis' => '431006114',
+        'plan_end' => '2025-01-28',
+        'pace' => 'Transitioned',
+        'alerts' => 'On Track'
+    ],
+    [
+        'name' => 'Sophia Martinez',
+        'ndis' => '431008442',
+        'plan_end' => '2024-08-22',
+        'pace' => 'Pending',
+        'alerts' => 'Overspending'
+    ]
+];
+
+$priceGuide = [
+    ['code' => '01_011_0107_1_1', 'description' => 'Assistance with Daily Living', 'rate' => 67.56, 'region' => 'Metro'],
+    ['code' => '04_104_0125_6_1', 'description' => 'Assistive Technology Assessment', 'rate' => 193.99, 'region' => 'Metro'],
+    ['code' => '07_101_0107_8_3', 'description' => 'Support Coordination', 'rate' => 100.14, 'region' => 'Remote'],
+    ['code' => '15_037_0117_1_3', 'description' => 'Improved Daily Living Training', 'rate' => 75.12, 'region' => 'Very Remote']
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -189,6 +266,39 @@ $quarantineAgreements = [
     </div>
 
     <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div>
+                        <h2 class="mb-1">Admin Dashboard</h2>
+                        <p class="text-muted mb-0">Mission control for plan management operations.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge text-bg-dark">Admin: admin@admin.com</span>
+                        <a href="logout.php" class="btn btn-outline-secondary btn-sm">Log out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <?php foreach ($executiveOverview as $card): ?>
+                <div class="col-md-6 col-xl-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-uppercase text-muted mb-0"><?= htmlspecialchars($card['label']) ?></h6>
+                                <span class="badge text-bg-primary"><?= htmlspecialchars($card['badge']) ?></span>
+                            </div>
+                            <div class="display-6 fw-semibold mb-1">
+                                <?= is_float($card['value']) ? number_format($card['value'], 1) : number_format($card['value']) ?>
+                            </div>
+                            <p class="text-muted small mb-0"><?= htmlspecialchars($card['meta']) ?></p>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
         <div class="row g-4">
             <div class="col-12">
                 <div class="card">
@@ -321,7 +431,7 @@ $quarantineAgreements = [
             </div>
         </div>
 
-        <div class="row g-4 mt-2" id="spending-alerts-section">
+        <div class="row g-4 mt-2">
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-body">
@@ -358,7 +468,7 @@ $quarantineAgreements = [
             </div>
         </div>
 
-        <div class="row g-4 mt-2">
+        <div class="row g-4 mt-2" id="spending-alerts-section">
             <div class="col-lg-7">
                 <div class="card h-100">
                     <div class="card-body">
@@ -437,6 +547,108 @@ $quarantineAgreements = [
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h5 class="card-title mb-1">Participant Management</h5>
+                                <p class="text-muted small mb-0">Search the master list and monitor plan expiries.</p>
+                            </div>
+                            <input type="search" class="form-control form-control-sm w-auto" id="participant-search" placeholder="Search participants">
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>NDIS Number</th>
+                                        <th>Plan End</th>
+                                        <th>PACE Status</th>
+                                        <th>Utilization</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="participant-table">
+                                    <?php foreach ($participants as $participant): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($participant['name']) ?></td>
+                                            <td><?= htmlspecialchars($participant['ndis']) ?></td>
+                                            <td>
+                                                <?= htmlspecialchars($participant['plan_end']) ?>
+                                                <span class="badge text-bg-warning ms-2">Watchlist</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge text-bg-<?= $participant['pace'] === 'Transitioned' ? 'success' : 'secondary' ?>">
+                                                    <?= htmlspecialchars($participant['pace']) ?>
+                                                </span>
+                                            </td>
+                                            <td><?= htmlspecialchars($participant['alerts']) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted small mb-0">Watchlist shows plans ending within the next 90 days.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Financial Operations</h5>
+                        <p class="text-muted small">High-volume payables and reconciliation workflows.</p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary">Generate Bulk Claim File</button>
+                            <button class="btn btn-outline-primary">Export ABA Payment File</button>
+                            <button class="btn btn-outline-primary">Run Trust Account Reconciliation</button>
+                        </div>
+                        <div class="alert alert-info mt-3 mb-0">
+                            Queue status: 86 approved invoices ready for bulk claiming.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Compliance & Pricing</h5>
+                        <p class="text-muted small">NDIS price guide navigator with regional multipliers.</p>
+                        <input type="search" class="form-control form-control-sm" id="price-search" placeholder="Search NDIS codes or keywords">
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Description</th>
+                                        <th>Rate (AUD)</th>
+                                        <th>Region</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="price-table">
+                                    <?php foreach ($priceGuide as $item): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($item['code']) ?></td>
+                                            <td><?= htmlspecialchars($item['description']) ?></td>
+                                            <td>$<?= number_format($item['rate'], 2) ?></td>
+                                            <td><?= htmlspecialchars($item['region']) ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge text-bg-secondary">Remote +25%</span>
+                            <span class="badge text-bg-secondary">Very Remote +40%</span>
                         </div>
                     </div>
                 </div>

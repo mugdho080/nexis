@@ -4,6 +4,10 @@ body {
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
+.login-body {
+    background: #eef2f7;
+}
+
 .hero {
     background: linear-gradient(135deg, #1f4c8d 0%, #153a64 60%, #0b1f36 100%);
     color: #fff;
