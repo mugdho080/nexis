@@ -167,8 +167,22 @@ if ($action === 'get_client') {
         ['type' => 'Underspend', 'message' => 'Capacity Building budget is 42% unspent with 90 days left.']
     ];
     $client['quarantines'] = [
-        ['provider' => 'BrightPath Therapy', 'service' => 'Daily Living Support', 'amount' => 50000],
-        ['provider' => 'Accessible Homes Co.', 'service' => 'Home Modification Package', 'amount' => 30000]
+        [
+            'provider' => 'BrightPath Therapy',
+            'service' => 'Daily Living Support',
+            'service_type' => 'Community Participation',
+            'amount' => 50000,
+            'used' => 18500,
+            'remaining' => 31500
+        ],
+        [
+            'provider' => 'Accessible Homes Co.',
+            'service' => 'Home Modification Package',
+            'service_type' => 'Assistive Tech',
+            'amount' => 30000,
+            'used' => 12000,
+            'remaining' => 18000
+        ]
     ];
     $client['providers'] = [
         ['name' => 'BrightPath Therapy', 'service' => 'Daily Living Support', 'status' => 'Active'],

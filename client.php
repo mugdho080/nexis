@@ -84,7 +84,10 @@ $clientId = $_GET['id'] ?? '1';
                             <tr>
                                 <th>Provider</th>
                                 <th>Service</th>
-                                <th>Amount</th>
+                                <th>Service Type 2</th>
+                                <th>Amount Quarantined</th>
+                                <th>Used</th>
+                                <th>Remaining</th>
                             </tr>
                         </thead>
                         <tbody id="quarantine-list"></tbody>
@@ -340,10 +343,13 @@ function renderClient(data) {
         <tr>
             <td>${item.provider}</td>
             <td>${item.service}</td>
+            <td>${item.service_type}</td>
             <td>${formatCurrency(item.amount)}</td>
+            <td>${formatCurrency(item.used)}</td>
+            <td>${formatCurrency(item.remaining)}</td>
         </tr>
     `).join('');
-    $('#quarantine-list').html(quarantineHtml || '<tr><td colspan="3" class="text-muted">No quarantined funds.</td></tr>');
+    $('#quarantine-list').html(quarantineHtml || '<tr><td colspan="6" class="text-muted">No quarantined funds.</td></tr>');
 
     const providerHtml = data.providers.map(provider => `
         <tr>
