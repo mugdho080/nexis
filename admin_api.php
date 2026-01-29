@@ -63,5 +63,65 @@ if ($action === 'get_participants') {
     exit;
 }
 
+if ($action === 'get_client') {
+    $client = $participants[0];
+    $client['pending_invoices'] = 12;
+    $client['budget'] = [
+        'total' => 825000,
+        'spent' => 412500,
+        'quarantined' => 185000
+    ];
+    $client['categories'] = [
+        [
+            'key' => 'core',
+            'name' => 'Core',
+            'allocated' => 420000,
+            'spent' => 210000,
+            'quarantined' => 90000,
+            'items' => [
+                ['label' => 'Daily Living Support', 'amount' => 140000],
+                ['label' => 'Community Participation', 'amount' => 70000]
+            ]
+        ],
+        [
+            'key' => 'capital',
+            'name' => 'Capital',
+            'allocated' => 240000,
+            'spent' => 112500,
+            'quarantined' => 45000,
+            'items' => [
+                ['label' => 'Assistive Technology', 'amount' => 95000],
+                ['label' => 'Home Modifications', 'amount' => 65000]
+            ]
+        ],
+        [
+            'key' => 'capacity',
+            'name' => 'Capacity Building',
+            'allocated' => 165000,
+            'spent' => 90000,
+            'quarantined' => 50000,
+            'items' => [
+                ['label' => 'Support Coordination', 'amount' => 55000],
+                ['label' => 'Improved Daily Living', 'amount' => 35000]
+            ]
+        ]
+    ];
+    $client['alerts'] = [
+        ['type' => 'Overspend', 'message' => 'Projected to exhaust Core funds in 27 days.'],
+        ['type' => 'Underspend', 'message' => 'Capacity Building budget is 42% unspent with 90 days left.']
+    ];
+    $client['quarantines'] = [
+        ['provider' => 'BrightPath Therapy', 'service' => 'Daily Living Support', 'amount' => 50000],
+        ['provider' => 'Accessible Homes Co.', 'service' => 'Home Modification Package', 'amount' => 30000]
+    ];
+    $client['providers'] = [
+        ['name' => 'BrightPath Therapy', 'service' => 'Daily Living Support', 'status' => 'Active'],
+        ['name' => 'Accessible Homes Co.', 'service' => 'Home Modification Package', 'status' => 'Active'],
+        ['name' => 'Northern Support Co.', 'service' => 'Support Coordination', 'status' => 'Pending']
+    ];
+    echo json_encode($client);
+    exit;
+}
+
 echo json_encode([]);
 ?>

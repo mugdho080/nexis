@@ -56,6 +56,20 @@ body {
     border-radius: 4px;
 }
 
+.budget-bars {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.budget-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
 .hero {
     background: linear-gradient(135deg, #1f4c8d 0%, #153a64 60%, #0b1f36 100%);
     color: #fff;

@@ -128,7 +128,7 @@ function loadData() {
                             </div>
                         </td>
                         <td><span class="badge ${p.plan_type === 'PACE' ? 'bg-info text-dark' : 'bg-secondary'}">${p.plan_type}</span></td>
-                        <td><button class="btn btn-sm btn-primary">Manage</button></td>
+                        <td><a class="btn btn-sm btn-primary" href="client.php?id=${p.ndis_no}">Manage</a></td>
                     </tr>
                 `;
             });
