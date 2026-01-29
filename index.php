@@ -52,6 +52,77 @@ $backOffice = [
         ]
     ]
 ];
+
+$budgetSummary = [
+    'total' => 825000,
+    'spent' => 412500,
+    'quarantined' => 185000
+];
+
+$budgetCategories = [
+    [
+        'name' => 'Core',
+        'allocated' => 420000,
+        'spent' => 210000,
+        'quarantined' => 90000,
+        'line_items' => [
+            ['Support Item' => 'Assistance with Daily Life', 'amount' => 140000],
+            ['Support Item' => 'Social & Community', 'amount' => 70000]
+        ]
+    ],
+    [
+        'name' => 'Capital',
+        'allocated' => 240000,
+        'spent' => 112500,
+        'quarantined' => 45000,
+        'line_items' => [
+            ['Support Item' => 'Assistive Tech', 'amount' => 95000],
+            ['Support Item' => 'Home Modifications', 'amount' => 65000]
+        ]
+    ],
+    [
+        'name' => 'Capacity Building',
+        'allocated' => 165000,
+        'spent' => 90000,
+        'quarantined' => 50000,
+        'line_items' => [
+            ['Support Item' => 'Support Coordination', 'amount' => 55000],
+            ['Support Item' => 'Improved Daily Living', 'amount' => 35000]
+        ]
+    ]
+];
+
+$spendingAlerts = [
+    [
+        'participant' => 'NDIS-48291',
+        'category' => 'Core',
+        'status' => 'Overspend Risk',
+        'message' => 'Projected to exhaust funds in 27 days.'
+    ],
+    [
+        'participant' => 'NDIS-91374',
+        'category' => 'Capacity Building',
+        'status' => 'Underspend Opportunity',
+        'message' => '42% of funds remain with 90 days left.'
+    ]
+];
+
+$quarantineAgreements = [
+    [
+        'provider' => 'BrightPath Therapy',
+        'category' => 'Core',
+        'amount' => 50000,
+        'service' => 'Daily Living Support',
+        'status' => 'Active'
+    ],
+    [
+        'provider' => 'Accessible Homes Co.',
+        'category' => 'Capital',
+        'amount' => 30000,
+        'service' => 'Home Modification Package',
+        'status' => 'Active'
+    ]
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -118,6 +189,69 @@ $backOffice = [
     </div>
 
     <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h5 class="card-title mb-1">Budget & Fund Management</h5>
+                                <p class="text-muted small mb-0">Live snapshot of total plan funding, spend, and quarantined allocations.</p>
+                            </div>
+                            <span class="badge text-bg-info">Dummy Data</span>
+                        </div>
+                        <div class="row mt-4 g-3">
+                            <div class="col-lg-4">
+                                <div class="summary-card" data-total="<?= $budgetSummary['total'] ?>" data-spent="<?= $budgetSummary['spent'] ?>" data-quarantined="<?= $budgetSummary['quarantined'] ?>">
+                                    <h6>Total Plan Budget</h6>
+                                    <p class="display-6 mb-1">$<?= number_format($budgetSummary['total']) ?></p>
+                                    <div class="progress-stack">
+                                        <div class="progress">
+                                            <div class="progress-bar bg-success spent-bar" role="progressbar"></div>
+                                        </div>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-warning quarantine-bar" role="progressbar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between small text-muted mt-2">
+                                        <span>Spent: $<?= number_format($budgetSummary['spent']) ?></span>
+                                        <span>Quarantined: $<?= number_format($budgetSummary['quarantined']) ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="row g-3">
+                                    <?php foreach ($budgetCategories as $index => $category): ?>
+                                        <div class="col-md-4">
+                                            <div class="category-card" data-total="<?= $category['allocated'] ?>" data-spent="<?= $category['spent'] ?>" data-quarantined="<?= $category['quarantined'] ?>">
+                                                <h6><?= htmlspecialchars($category['name']) ?></h6>
+                                                <p class="fw-semibold mb-1">$<?= number_format($category['allocated']) ?> allocated</p>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-success spent-bar" role="progressbar"></div>
+                                                    <div class="progress-bar bg-warning quarantine-bar" role="progressbar"></div>
+                                                </div>
+                                                <button class="btn btn-link p-0 mt-2 small" data-bs-toggle="collapse" data-bs-target="#category-details-<?= $index ?>" aria-expanded="false">View breakdown</button>
+                                                <div class="collapse mt-2" id="category-details-<?= $index ?>">
+                                                    <ul class="list-group list-group-flush small">
+                                                        <?php foreach ($category['line_items'] as $line): ?>
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                <span><?= htmlspecialchars($line['Support Item']) ?></span>
+                                                                <span>$<?= number_format($line['amount']) ?></span>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             <div class="col-lg-4">
                 <div class="card h-100">
@@ -187,7 +321,7 @@ $backOffice = [
             </div>
         </div>
 
-        <div class="row g-4 mt-2">
+        <div class="row g-4 mt-2" id="spending-alerts-section">
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-body">
@@ -225,11 +359,85 @@ $backOffice = [
         </div>
 
         <div class="row g-4 mt-2">
-            <div class="col-12">
-                <div class="card">
+            <div class="col-lg-7">
+                <div class="card h-100">
                     <div class="card-body">
-                        <h5 class="card-title">Spending Alerts</h5>
-                        <div id="alerts" class="alert-grid"></div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div>
+                                <h5 class="card-title mb-1">Spending Alerts</h5>
+                                <p class="text-muted small mb-0">Automated notifications based on plan burn rate.</p>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm" id="run-spending-check">Run spending check</button>
+                        </div>
+                        <div id="alerts" class="alert-grid mt-3">
+                            <?php foreach ($spendingAlerts as $alert): ?>
+                                <div class="alert alert-<?= $alert['status'] === 'Overspend Risk' ? 'warning' : 'info' ?>">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong><?= htmlspecialchars($alert['participant']) ?></strong>
+                                        <span class="badge text-bg-secondary"><?= htmlspecialchars($alert['category']) ?></span>
+                                    </div>
+                                    <p class="mb-0"><?= htmlspecialchars($alert['status']) ?> — <?= htmlspecialchars($alert['message']) ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Fund Quarantining</h5>
+                        <p class="text-muted small">Lock budget amounts to service agreements with providers.</p>
+                        <form id="quarantine-form" class="row g-2">
+                            <div class="col-12">
+                                <input type="text" class="form-control" name="provider" placeholder="Provider name" required>
+                            </div>
+                            <div class="col-6">
+                                <select class="form-select" name="category" required>
+                                    <option value="">Category</option>
+                                    <option value="Core">Core</option>
+                                    <option value="Capital">Capital</option>
+                                    <option value="Capacity Building">Capacity Building</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" name="amount" placeholder="Amount" min="0" required>
+                            </div>
+                            <div class="col-12">
+                                <input type="text" class="form-control" name="service" placeholder="Service agreement" required>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-primary w-100" type="submit">Quarantine funds</button>
+                            </div>
+                        </form>
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Active Quarantines</h6>
+                                <span class="badge text-bg-warning" id="quarantine-total">$0</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Provider</th>
+                                            <th>Category</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="quarantine-table">
+                                        <?php foreach ($quarantineAgreements as $agreement): ?>
+                                            <tr>
+                                                <td><?= htmlspecialchars($agreement['provider']) ?></td>
+                                                <td><?= htmlspecialchars($agreement['category']) ?></td>
+                                                <td data-amount="<?= $agreement['amount'] ?>">$<?= number_format($agreement['amount']) ?></td>
+                                                <td><span class="badge text-bg-success"><?= htmlspecialchars($agreement['status']) ?></span></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

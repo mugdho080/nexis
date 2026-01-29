@@ -14,6 +14,35 @@ body {
     border: none;
 }
 
+.summary-card,
+.category-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+    height: 100%;
+}
+
+.summary-card h6,
+.category-card h6 {
+    font-weight: 700;
+}
+
+.progress-stack .progress {
+    height: 10px;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.progress {
+    height: 10px;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.progress-bar {
+    border-radius: 999px;
+}
+
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
