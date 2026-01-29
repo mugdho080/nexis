@@ -8,6 +8,54 @@ body {
     background: #eef2f7;
 }
 
+.admin-body {
+    background-color: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+    height: 100vh;
+    background: #1a202c;
+    color: #fff;
+    position: fixed;
+    width: 250px;
+    padding: 25px;
+}
+
+.main {
+    margin-left: 250px;
+    padding: 40px;
+}
+
+.stat-card {
+    border: none;
+    border-radius: 12px;
+    transition: 0.3s;
+    background: #fff;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+.nav-link {
+    color: #a0aec0;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.nav-link.active {
+    background: #3182ce;
+    color: #fff;
+}
+
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+}
+
 .hero {
     background: linear-gradient(135deg, #1f4c8d 0%, #153a64 60%, #0b1f36 100%);
     color: #fff;
