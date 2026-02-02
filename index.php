@@ -69,12 +69,15 @@ if (empty($_SESSION['is_admin'])) {
     </div>
 
     <div class="card shadow-sm border-0 rounded-3">
-        <div class="card-header bg-white p-4 border-bottom d-flex justify-content-between align-items-center">
+        <div class="card-header bg-white p-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
                 <h5 class="mb-0 fw-bold">Active Participant Oversight</h5>
                 <small class="text-muted">Dummy client list with utilization health.</small>
             </div>
-            <input type="search" class="form-control form-control-sm w-auto" id="participant-search" placeholder="Search participants">
+            <div class="d-flex flex-wrap gap-2">
+                <input type="search" class="form-control form-control-sm" id="participant-search" placeholder="Search participants">
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#onboardingModal">Add New Client</button>
+            </div>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -132,6 +135,123 @@ if (empty($_SESSION['is_admin'])) {
                     <tr><td colspan="8" class="text-center p-5">Loading...</td></tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="onboardingModal" tabindex="-1" aria-labelledby="onboardingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="onboardingModalLabel">NDIS Participant Onboarding</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="onboarding-form">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First & Last Name</label>
+                            <input type="text" class="form-control" name="full_name" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">NDIS Number</label>
+                            <input type="text" class="form-control" name="ndis_number" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="dob" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Primary Email</label>
+                            <input type="email" class="form-control" name="primary_email" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Mobile</label>
+                            <input type="tel" class="form-control" name="mobile" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Nominee Contact</label>
+                            <input type="text" class="form-control" name="nominee">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Residential Address</label>
+                            <input type="text" class="form-control" name="address" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Postcode</label>
+                            <input type="text" class="form-control" name="postcode" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">NDIS Region/MMM</label>
+                            <select class="form-select" name="region" required>
+                                <option value="">Select</option>
+                                <option>National/Metro</option>
+                                <option>Remote</option>
+                                <option>Very Remote</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Plan Start Date</label>
+                            <input type="date" class="form-control" name="plan_start" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Plan End Date</label>
+                            <input type="date" class="form-control" name="plan_end" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">System Type</label>
+                            <select class="form-select" name="system_type" required>
+                                <option value="">Select</option>
+                                <option>Legacy</option>
+                                <option>PACE</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Plan Management Type</label>
+                            <input type="text" class="form-control" name="plan_management" placeholder="Plan Managed - Core/CB/Capital" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Core Supports Budget</label>
+                            <input type="number" class="form-control" name="budget_core" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Capacity Building Budget</label>
+                            <input type="number" class="form-control" name="budget_capacity" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Capital Supports Budget</label>
+                            <input type="number" class="form-control" name="budget_capital" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Support Coordinator</label>
+                            <input type="text" class="form-control" name="support_coordinator">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Coordinator Agency</label>
+                            <input type="text" class="form-control" name="coordinator_agency">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Coordinator Email</label>
+                            <input type="email" class="form-control" name="coordinator_email">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Provider Quarantining (Optional)</label>
+                            <input type="text" class="form-control" name="quarantine_provider" placeholder="Provider + $ amount to lock">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Notes</label>
+                            <input type="text" class="form-control" name="notes" placeholder="Additional onboarding notes">
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3 mb-0">
+                        Invoices outside plan dates will be flagged automatically.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Client</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -273,6 +393,17 @@ $('#participant-search').on('input', function () {
         const text = $(this).text().toLowerCase();
         $(this).toggle(text.indexOf(term) !== -1);
     });
+});
+
+$('#onboarding-form').on('submit', function (event) {
+    event.preventDefault();
+    alert('Client onboarding saved (dummy).');
+    this.reset();
+    const modalElement = document.getElementById('onboardingModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
 });
 
 $('#invoice-search-name, #invoice-search-ndis, #invoice-search-number, #invoice-search-date, #invoice-search-status').on('input change', function () {
